@@ -3,7 +3,7 @@ import argparse
 from collections import deque
 
 IMU_data = "../parsePi/samples.txt"
-filterLength = 50
+filterLength = 5
 LowerCutOff = 0.02
 HigherCutOff = 0.05
 FALL_THRESH_HIGH= 0.3
@@ -37,29 +37,34 @@ def main(args):
             weights.insert(sample, 2*(ft2-ft1))
         weights.insert(sample, weights[sample]*(0.54 - 0.46 * math.cos(2*M_PI*sample/M)))
 
+    #print "weights = %s" % weights
+
     outputSignal = 0.0
 
     for line in open(IMU_data, 'r'):
-	#print lines_fifo
+	outputSignal = 0.0
+	print "lines_fifo = %s" % lines_fifo
+        list_line = line.split(',')
 	if len(lines_fifo) >= args.filterLength:
             for sample in xrange(0, args.filterLength):
                 #print "float(lines_fifo[sample]) = %f" % float(lines_fifo[sample])
-		outputSignal += weights[sample]*float(lines_fifo[sample])
+		#print "weights = %f " % weights[sample]
+		#print "float(lines_fifo = %f)" % float(lines_fifo[sample])
+		outputSignal = outputSignal + weights[sample]*float(lines_fifo[sample])
 
-	    print "outputSignal = %d" % outputSignal
+	    print "outputSignal = %f" % outputSignal
 
             if outputSignal >= FALL_THRESH_HIGH or outputSignal <= FALL_THRESH_LOW:
                 print "fall detected"
                 # push parse notification
 
             lines_fifo.popleft()
-            list_line = line.split(',')
-            print "list_line = %s" % list_line
+            #print "list_line = %s" % list_line
 	    if (len(list_line) > 2):
 		lines_fifo.append(list_line[2])
         else:
             list_line = line.split(',')
-            print "list_line = %s" % list_line
+            #print "list_line = %s" % list_line
 	    if (len(list_line) > 2):
 		lines_fifo.append(list_line[2])
 
