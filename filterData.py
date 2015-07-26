@@ -3,7 +3,8 @@ import argparse
 from collections import deque
 
 IMU_data = "imu.dat"
-FALL_THRESH = 0.8
+FALL_THRESH_HIGH= 0.3
+FALL_THRESH_LOW = 0.025
 
 lines_fifo = deque()
 
@@ -46,7 +47,7 @@ def main(args):
             for sample in xrange(0, args.filterLength):
                 outputSignal += float(lines_fifo[sample])
 
-            if outputSignal >= FALL_THRESH:
+            if outputSignal >= FALL_THRESH_HIGH or outputSignal <= FALL_THRESH_LOW:
                 print "fall detected"
                 # push parse notification
 
