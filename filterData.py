@@ -2,7 +2,10 @@ import math
 import argparse
 from collections import deque
 
-IMU_data = "imu.dat"
+IMU_data = "../parsePi/samples.txt"
+filterLength = 50
+LowerCutOff = 0.02
+HigherCutOff = 0.05
 FALL_THRESH_HIGH= 0.3
 FALL_THRESH_LOW = 0.025
 
@@ -12,16 +15,10 @@ def init():
     parser = argparse.ArgumentParser(description='input filter for IMU data')
 
     parser.add_argument('-i', action="store", dest="IMU_data")
-    parser.add_argument('-f', action="store", dest="filterLength", type=int)
-    parser.add_argument('-s', action="store", dest="samplingFreq", type=float)
-    parser.add_argument('-l', action="store", dest="firstCutOff", type=float)
-    parser.add_argument('-w', action="store", dest="secondCutOff", type=float)
-
-    parser.add_argument('--input', action="store", dest="IMU_data")
-    parser.add_argument('--filterLength', action="store", dest="filterLength")
-    parser.add_argument('--samplingFreq', action="store", dest="samplingFreq", type=float)
-    parser.add_argument('--firstCutOff', action="store", dest="firstCutOff", type=float)
-    parser.add_argument('--secondCutOff', action="store", dest="secondCutOff", type=float)
+    parser.add_argument('-f', action="store", dest="filterLength", type=int, default=filterLength)
+    parser.add_argument('-s', action="store", dest="samplingFreq", type=float, default=filterLength)
+    parser.add_argument('-l', action="store", dest="firstCutOff", type=float, default=LowerCutOff)
+    parser.add_argument('-w', action="store", dest="secondCutOff", type=float, default=HigherCutOff)
 
     args = parser.parse_args()
     main(args)
@@ -43,19 +40,28 @@ def main(args):
     outputSignal = 0.0
 
     for line in open(IMU_data, 'r'):
-        if len(lines_fifo) == args.filterLength:
+	#print lines_fifo
+	if len(lines_fifo) >= args.filterLength:
             for sample in xrange(0, args.filterLength):
-                outputSignal += float(lines_fifo[sample])
+                #print "float(lines_fifo[sample]) = %f" % float(lines_fifo[sample])
+		outputSignal += weights[sample]*float(lines_fifo[sample])
+
+	    print "outputSignal = %d" % outputSignal
 
             if outputSignal >= FALL_THRESH_HIGH or outputSignal <= FALL_THRESH_LOW:
                 print "fall detected"
                 # push parse notification
 
             lines_fifo.popleft()
-            lines_fifo.append(line.split(',')[2])
+            list_line = line.split(',')
+            print "list_line = %s" % list_line
+	    if (len(list_line) > 2):
+		lines_fifo.append(list_line[2])
         else:
-            lines_fifo.append(line.split(',')[2])
-
+            list_line = line.split(',')
+            print "list_line = %s" % list_line
+	    if (len(list_line) > 2):
+		lines_fifo.append(list_line[2])
 
 if __name__ == "__main__":
     init()
