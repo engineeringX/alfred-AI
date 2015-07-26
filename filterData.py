@@ -1,10 +1,8 @@
 import math
 import argparse
-import collections
-
 from collections import deque
 
-IMU_data = "/home/simar/parse/inputFolder/imu.dat"
+IMU_data = "imu.dat"
 FALL_THRESH = 0.8
 
 lines_fifo = deque()
@@ -41,17 +39,16 @@ def main(args):
             weights.insert(sample, 2*(ft2-ft1))
         weights.insert(sample, weights[sample]*(0.54 - 0.46 * math.cos(2*M_PI*sample/M)))
 
-    outputSignal = 0
-
-    fd = open(IMU_data, 'r')
+    outputSignal = 0.0
 
     for line in open(IMU_data, 'r'):
         if len(lines_fifo) == args.filterLength:
             for sample in xrange(0, args.filterLength):
-                outputSignal += lines_fifo[sample]
+                outputSignal += float(lines_fifo[sample])
 
             if outputSignal >= FALL_THRESH:
-            # push parse notification
+                print "fall detected"
+                # push parse notification
 
             lines_fifo.popleft()
             lines_fifo.append(line.split(',')[2])
