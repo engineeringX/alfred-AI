@@ -1,6 +1,10 @@
+import json, httplib
 import math
 import argparse
 from collections import deque
+
+appID = "kKW7oJS0nwEG4V6f3LvYooU5BQxFnH6eZ9aS31A3"
+apiKey = "HEZHvUyEqV4VOV61YaEFbMywGKq7pJNlPhlQtWRt"t
 
 IMU_data = "../parsePi/samples.txt"
 filterLength = 50
@@ -30,7 +34,7 @@ def main(args):
     M_PI = math.pi
     ft1 = args.firstCutOff / args.samplingFreq
     ft2 = args.secondCutOff / args.samplingFreq
-    
+
     for sample in xrange(0, args.filterLength):
 	if (sample != M / 2):
 	    weights.insert(sample, (math.sin(2*M_PI*ft2*(sample-M/2))/(M_PI*(sample-M/2))-math.sin(2*M_PI*ft1*(sample-M/2))/(M_PI*(sample-M/2))) * (0.54 - 0.46 * math.cos(2*M_PI*sample/M)))
@@ -59,6 +63,7 @@ def main(args):
 		    if outputSignal >= FALL_THRESH_HIGH or outputSignal <= FALL_THRESH_LOW:
 			print "fall detected"
 			# push parse notification
+            send_push()
 
 		    lines_fifo.popleft()
 		    #print "list_line = %s" % list_line
@@ -69,6 +74,25 @@ def main(args):
 		    #print "list_line = %s" % list_line
 		    if (len(list_line) > 2):
 			lines_fifo.append(list_line[2])
+
+def send_push():
+    connection.request
+    connection = httplib.HTTPSConnection('api.parse.com', 443)
+    connection.connect()
+    connection.request('POST', '/1/push', json.dumps({
+        "channels": [
+            "Alfred"
+            ],
+        "data": {
+            "alert": "A fall has been detected"
+            }
+        }), {
+            "X-Parse-Application-Id": appID
+            "X-Parse-REST-API-Key": appKey
+            "Content-Type": "application/json"
+        })
+    result = json.loads(connection.getresponse().read())
+    print result
 
 if __name__ == "__main__":
     init()
