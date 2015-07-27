@@ -3,7 +3,7 @@ import argparse
 from collections import deque
 
 IMU_data = "../parsePi/samples.txt"
-filterLength = 5
+filterLength = 50
 LowerCutOff = 0.02
 HigherCutOff = 0.05
 FALL_THRESH_HIGH= 0.03
