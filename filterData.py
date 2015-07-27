@@ -2,9 +2,10 @@ import json, httplib
 import math
 import argparse
 from collections import deque
+import time
 
 appID = "kKW7oJS0nwEG4V6f3LvYooU5BQxFnH6eZ9aS31A3"
-apiKey = "HEZHvUyEqV4VOV61YaEFbMywGKq7pJNlPhlQtWRt"t
+apiKey = "HEZHvUyEqV4VOV61YaEFbMywGKq7pJNlPhlQtWRt"
 
 IMU_data = "../parsePi/samples.txt"
 filterLength = 50
@@ -42,12 +43,14 @@ def main(args):
 	    weights.insert(sample, (2*(ft2-ft1)) * (0.54 - 0.46 * math.cos(2*M_PI*sample/M)))
 
     print "weights = %s" % weights
+    fd = open(IMU_data, 'r')
 
     while (1):
 
 	    outputSignal = 0.0
 
-	    for line in open(IMU_data, 'r'):
+	    line = fd.readline()
+	    if line:
 		outputSignal = 0.0
 		#print "lines_fifo = %s" % lines_fifo
 		list_line = line.split(',')
@@ -61,9 +64,9 @@ def main(args):
 		    print "outputSignal = %f" % outputSignal
 
 		    if outputSignal >= FALL_THRESH_HIGH or outputSignal <= FALL_THRESH_LOW:
-			print "fall detected"
-			# push parse notification
-            send_push()
+				print "fall detected"
+				# push parse notification
+				send_push()
 
 		    lines_fifo.popleft()
 		    #print "list_line = %s" % list_line
@@ -74,6 +77,10 @@ def main(args):
 		    #print "list_line = %s" % list_line
 		    if (len(list_line) > 2):
 			lines_fifo.append(list_line[2])
+
+	    else:
+			print "waiting for more data.."
+			time.sleep(1)
 
 def send_push():
     connection.request
@@ -87,8 +94,8 @@ def send_push():
             "alert": "A fall has been detected"
             }
         }), {
-            "X-Parse-Application-Id": appID
-            "X-Parse-REST-API-Key": appKey
+            "X-Parse-Application-Id": appID,
+            "X-Parse-REST-API-Key": appKey,
             "Content-Type": "application/json"
         })
     result = json.loads(connection.getresponse().read())
