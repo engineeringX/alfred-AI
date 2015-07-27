@@ -6,7 +6,7 @@ IMU_data = "../parsePi/samples.txt"
 filterLength = 5
 LowerCutOff = 0.02
 HigherCutOff = 0.05
-FALL_THRESH_HIGH= 0.3
+FALL_THRESH_HIGH= 0.03
 FALL_THRESH_LOW = 0.025
 
 lines_fifo = deque()
@@ -25,48 +25,50 @@ def init():
 
 def main(args):
     weights = []
-    M = args.filterLength
+    M = args.filterLength - 1
+    #print "M = %d" % M
     M_PI = math.pi
     ft1 = args.firstCutOff / args.samplingFreq
     ft2 = args.secondCutOff / args.samplingFreq
-
+    
     for sample in xrange(0, args.filterLength):
-        if (sample != M / 2):
-            weights.insert(sample, math.sin(2*M_PI*ft2*(sample-M/2)/(M_PI*(sample-M/2)-math.sin(2*M_PI*ft1*(sample-M/2))/(M_PI*(sample-M/2)))))
-        else:
-            weights.insert(sample, 2*(ft2-ft1))
-        weights.insert(sample, weights[sample]*(0.54 - 0.46 * math.cos(2*M_PI*sample/M)))
+	if (sample != M / 2):
+	    weights.insert(sample, (math.sin(2*M_PI*ft2*(sample-M/2))/(M_PI*(sample-M/2))-math.sin(2*M_PI*ft1*(sample-M/2))/(M_PI*(sample-M/2))) * (0.54 - 0.46 * math.cos(2*M_PI*sample/M)))
+	else:
+	    weights.insert(sample, (2*(ft2-ft1)) * (0.54 - 0.46 * math.cos(2*M_PI*sample/M)))
 
-    #print "weights = %s" % weights
+    print "weights = %s" % weights
 
-    outputSignal = 0.0
+    while (1):
 
-    for line in open(IMU_data, 'r'):
-	outputSignal = 0.0
-	print "lines_fifo = %s" % lines_fifo
-        list_line = line.split(',')
-	if len(lines_fifo) >= args.filterLength:
-            for sample in xrange(0, args.filterLength):
-                #print "float(lines_fifo[sample]) = %f" % float(lines_fifo[sample])
-		#print "weights = %f " % weights[sample]
-		#print "float(lines_fifo = %f)" % float(lines_fifo[sample])
-		outputSignal = outputSignal + weights[sample]*float(lines_fifo[sample])
+	    outputSignal = 0.0
 
-	    print "outputSignal = %f" % outputSignal
+	    for line in open(IMU_data, 'r'):
+		outputSignal = 0.0
+		#print "lines_fifo = %s" % lines_fifo
+		list_line = line.split(',')
+		if len(lines_fifo) >= args.filterLength:
+		    for sample in xrange(0, args.filterLength):
+			#print "float(lines_fifo[sample]) = %f" % float(lines_fifo[sample])
+			#print "weights = %f " % weights[sample]
+			#print "float(lines_fifo = %f)" % float(lines_fifo[sample])
+			outputSignal = outputSignal + weights[sample]*float(lines_fifo[sample])
 
-            if outputSignal >= FALL_THRESH_HIGH or outputSignal <= FALL_THRESH_LOW:
-                print "fall detected"
-                # push parse notification
+		    print "outputSignal = %f" % outputSignal
 
-            lines_fifo.popleft()
-            #print "list_line = %s" % list_line
-	    if (len(list_line) > 2):
-		lines_fifo.append(list_line[2])
-        else:
-            list_line = line.split(',')
-            #print "list_line = %s" % list_line
-	    if (len(list_line) > 2):
-		lines_fifo.append(list_line[2])
+		    if outputSignal >= FALL_THRESH_HIGH or outputSignal <= FALL_THRESH_LOW:
+			print "fall detected"
+			# push parse notification
+
+		    lines_fifo.popleft()
+		    #print "list_line = %s" % list_line
+		    if (len(list_line) > 2):
+			lines_fifo.append(list_line[2])
+		else:
+		    list_line = line.split(',')
+		    #print "list_line = %s" % list_line
+		    if (len(list_line) > 2):
+			lines_fifo.append(list_line[2])
 
 if __name__ == "__main__":
     init()
