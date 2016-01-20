@@ -6,6 +6,8 @@ import time
 
 appID = "kKW7oJS0nwEG4V6f3LvYooU5BQxFnH6eZ9aS31A3"
 apiKey = "HEZHvUyEqV4VOV61YaEFbMywGKq7pJNlPhlQtWRt"
+connection = httplib.HTTPSConnection('api.parse.com', 443)
+connection.connect()
 
 IMU_data = "../parsePi/samples.txt"
 filterLength = 50
@@ -13,6 +15,7 @@ LowerCutOff = 0.02
 HigherCutOff = 0.05
 FALL_THRESH_HIGH= 0.03
 FALL_THRESH_LOW = 0.025
+total_nots = 0
 
 lines_fifo = deque()
 
@@ -65,8 +68,11 @@ def main(args):
 
 		    if outputSignal >= FALL_THRESH_HIGH or outputSignal <= FALL_THRESH_LOW:
 				print "fall detected"
+				global total_nots
+				total_nots += 1
 				# push parse notification
-				send_push()
+				if(total_nots % 50 == 0):
+					send_push()
 
 		    lines_fifo.popleft()
 		    #print "list_line = %s" % list_line
@@ -83,9 +89,6 @@ def main(args):
 			time.sleep(1)
 
 def send_push():
-    connection.request
-    connection = httplib.HTTPSConnection('api.parse.com', 443)
-    connection.connect()
     connection.request('POST', '/1/push', json.dumps({
         "channels": [
             "Alfred"
@@ -95,7 +98,7 @@ def send_push():
             }
         }), {
             "X-Parse-Application-Id": appID,
-            "X-Parse-REST-API-Key": appKey,
+            "X-Parse-REST-API-Key": apiKey,
             "Content-Type": "application/json"
         })
     result = json.loads(connection.getresponse().read())
