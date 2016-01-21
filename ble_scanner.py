@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import bglib, serial, time, datetime
+import bglib, serial, time, datetime, signal
 
 # handler to notify of an API parser timeout condition
 def my_timeout(sender, args):
@@ -29,6 +29,9 @@ def my_ble_evt_gap_scan_response(sender, args):
         print ','.join(['%d' % b for b in data])
 
 def main():
+    # Handle ctrl-c
+    signal.signal(signal.SIGINT, exit_handler)
+
     # NOTE: CHANGE THESE TO FIT YOUR TEST SYSTEM
     port_name = "/dev/ttyACM0"
     baud_rate = 115200
@@ -75,6 +78,9 @@ def main():
 
         # don't burden the CPU
         time.sleep(0.01)
+
+def exit_handler(signal, frame):
+    exit(0)
 
 if __name__ == '__main__':
     main()
