@@ -1,4 +1,6 @@
-f = open("test0", 'r')
+import sys
+
+f = open(sys.argv[1], 'r')
 
 missed = 0
 count = int(f.readline().split(',')[6])
