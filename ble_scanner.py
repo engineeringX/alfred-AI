@@ -40,7 +40,7 @@ def main():
     signal.signal(signal.SIGINT, exit_handler)
 
     # NOTE: CHANGE THESE TO FIT YOUR TEST SYSTEM
-    port_name = "/dev/cu.usbmodem1"
+    port_name = "/dev/ttyACM0"
     baud_rate = 115200
     packet_mode = True
 
