@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-import bglib, serial, time, datetime, signal
+import bglib, serial, time, datetime, signal, sys
 
-f = open("test0", 'w')
+f = open(sys.argv[1], 'w')
 packet_count = 0
 
 # handler to notify of an API parser timeout condition
@@ -40,7 +40,7 @@ def main():
     signal.signal(signal.SIGINT, exit_handler)
 
     # NOTE: CHANGE THESE TO FIT YOUR TEST SYSTEM
-    port_name = "/dev/ttyACM0"
+    port_name = "/dev/cu.usbmodem1"
     baud_rate = 115200
     packet_mode = True
 
