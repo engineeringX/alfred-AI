@@ -2,6 +2,9 @@
 
 import bglib, serial, time, datetime, signal
 
+f = open("test0", 'w')
+packet_count = 0
+
 # handler to notify of an API parser timeout condition
 def my_timeout(sender, args):
     # might want to try the following lines to reset, though it probably
@@ -26,7 +29,11 @@ def my_ble_evt_gap_scan_response(sender, args):
         #disp_list.append("%d" % args["address_type"])
         #disp_list.append("%d" % args["bond"])
         #disp_list.append("%s" % ','.join(['%d' % b for b in data]))
-        print ','.join(['%d' % b for b in data])
+        f.write(','.join(['%d' % b for b in data]) + "\n")
+        global packet_count
+        packet_count += 1
+        if(packet_count >= 1500):
+            exit_handler(0, 0)
 
 def main():
     # Handle ctrl-c
@@ -77,9 +84,10 @@ def main():
         ble.check_activity(ser)
 
         # don't burden the CPU
-        time.sleep(0.01)
+        #time.sleep(0.01)
 
 def exit_handler(signal, frame):
+    f.close()
     exit(0)
 
 if __name__ == '__main__':
