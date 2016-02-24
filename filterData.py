@@ -9,13 +9,13 @@ apiKey = "HEZHvUyEqV4VOV61YaEFbMywGKq7pJNlPhlQtWRt"
 connection = httplib.HTTPSConnection('api.parse.com', 443)
 connection.connect()
 
-IMU_data = "./data/test2"
+IMU_data = "./data/test5"
 filterLength = 50
 secondFilterLength = 70
 LowerCutOff = 0.005
 HigherCutOff = 0.006
-FALL_THRESH_HIGH= 800
-FALL_THRESH_LOW = 200
+FALL_THRESH_HIGH= 550
+FALL_THRESH_LOW = 100
 PARSE_FALL_GROUP_LIMIT = 20
 total_nots = 0
 
@@ -45,11 +45,13 @@ def main(args):
 
     for sample in xrange(0, args.filterLength):
         if (sample != M / 2):
-            weights.insert(sample, (math.sin(2*M_PI*ft2*(sample-M/2))/(M_PI*(sample-M/2))-math.sin(2*M_PI*ft1*(sample-M/2))/(M_PI*(sample-M/2))) * (0.54 - 0.46 * math.cos(2*M_PI*sample/M)))
+            weights.insert(sample, ((math.sin(2*M_PI*ft2*(sample-M/2))/(M_PI*(sample-M/2)))-(math.sin(2*M_PI*ft1*(sample-M/2))/(M_PI*(sample-M/2)))) * (0.54 - 0.46 * math.cos(2*M_PI*sample/M)))
     else:
         weights.insert(sample, (2*(ft2-ft1)) * (0.54 - 0.46 * math.cos(2*M_PI*sample/M)))
 
-    print "weights = %s" % weights
+    weight = 0
+    #for weight in xrange(0, len(weights)):
+        #print ("[{}] = {}".format(weight, weights[weight]))
     fd = open(IMU_data, 'r')
 
     dataPoint = 0
@@ -63,6 +65,7 @@ def main(args):
             outputSignal = 0.0
             #print "lines_fifo = %s" % lines_fifo
             list_line = line.split(',')
+            #print list_line
             if len(lines_fifo) >= args.filterLength:
                 for sample in xrange(0, args.filterLength):
                     #print "float(lines_fifo[sample]) = %f" % float(lines_fifo[sample])
