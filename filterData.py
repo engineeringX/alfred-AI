@@ -9,7 +9,7 @@ apiKey = "HEZHvUyEqV4VOV61YaEFbMywGKq7pJNlPhlQtWRt"
 connection = httplib.HTTPSConnection('api.parse.com', 443)
 connection.connect()
 
-IMU_data = "../parsePi/samples.txt"
+IMU_data = "./data/test2"
 filterLength = 50
 LowerCutOff = 0.02
 HigherCutOff = 0.05
@@ -71,7 +71,7 @@ def main(args):
 				global total_nots
 				total_nots += 1
 				# push parse notification
-				if(total_nots % 50 == 0):
+				if(total_nots % 20 == 0):
 					send_push()
 
 		    lines_fifo.popleft()
