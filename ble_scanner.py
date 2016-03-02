@@ -2,6 +2,9 @@
 
 import bglib, serial, time, datetime, signal, sys
 
+#mac = "EB16450404D9"
+mac = "C94B9DC414AF" 
+
 f = open(sys.argv[1], 'w')
 packet_count = 0
 
@@ -17,7 +20,7 @@ def my_timeout(sender, args):
 def my_ble_evt_gap_scan_response(sender, args):
     t = datetime.datetime.now()
     sender = ''.join(['%02X' % b for b in args["sender"][::-1]])
-    if(sender == "EB16450404D9"):
+    if(sender == mac):
         it = iter(args["data"][args["data"].index(0xff)+1:])
         data_bytes = [((next(it) << 8) | x) for x in it]
         data = [(x - 65536) if (x & 0x8000) else x for x in data_bytes]
