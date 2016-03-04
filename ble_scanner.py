@@ -5,6 +5,8 @@ from multiprocessing import Pipe
 
 send = None
 pipe = None
+#mac = "EB16450404D9"
+mac = "C94B9DC414AF" 
 
 def pipe_send(pipe, data):
   pipe.send(data)
@@ -24,7 +26,7 @@ def my_timeout(sender, args):
 def my_ble_evt_gap_scan_response(sender, args):
   t = datetime.datetime.now()
   sender = ''.join(['%02X' % b for b in args["sender"][::-1]])
-  if(sender == "EB16450404D9"):
+  if(sender == mac):
       it = iter(args["data"][args["data"].index(0xff)+1:])
       data_bytes = [((next(it) << 8) | x) for x in it]
       data = [(x - 65536) if (x & 0x8000) else x for x in data_bytes]
@@ -94,11 +96,11 @@ def ble_scanner(p):
   ble.check_activity(ser, 1)
 
   while (1):
-      # check for all incoming data (no timeout, non-blocking)
-      ble.check_activity(ser)
+    # check for all incoming data (no timeout, non-blocking)
+    ble.check_activity(ser)
 
-      # don't burden the CPU
-      #time.sleep(0.01)
+    # don't burden the CPU
+    #time.sleep(0.01)
 
 def exit_handler(signal, frame):
   pipe.close()
