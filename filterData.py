@@ -17,7 +17,9 @@ HigherCutOff = 0.006
 FALL_THRESH_HIGH= 550
 FALL_THRESH_LOW = 100
 PARSE_FALL_GROUP_LIMIT = 20
+dataPoint = 0
 total_nots = 0
+args = ""
 
 lines_fifo = deque()
 sum_data = deque()
@@ -32,8 +34,62 @@ def init():
     parser.add_argument('-l', action="store", dest="firstCutOff", type=float, default=LowerCutOff)
     parser.add_argument('-w', action="store", dest="secondCutOff", type=float, default=HigherCutOff)
 
+    global args
     args = parser.parse_args()
     main(args)
+
+def motionFilter(line, weights):
+    global dataPoint
+    dataPoint += 1
+    outputSignal = 0.0
+    #print "lines_fifo = %s" % lines_fifo
+    list_line = line.split(',')
+    #print list_line
+    if len(lines_fifo) >= args.filterLength:
+        for sample in xrange(0, args.filterLength):
+            #print "float(lines_fifo[sample]) = %f" % float(lines_fifo[sample])
+            #print "weights = %f " % weights[sample]
+            #print "float(lines_fifo = %f)" % float(lines_fifo[sample])
+            outputSignal = outputSignal + weights[sample]*float(lines_fifo[sample])
+
+        print ("[{}] outputSignal = {}").format(dataPoint, outputSignal)
+
+        sum_data.append(outputSignal)
+        #print ("sum_data = {}".format(sum_data))
+
+        if (len(sum_data) >= secondFilterLength):
+            total_sum_data = 0
+            for elem in sum_data:
+                total_sum_data +=elem
+            if total_sum_data >= FALL_THRESH_HIGH or total_sum_data <= FALL_THRESH_LOW:
+                print "fall detected"
+                print ("total_sum_data = {}".format(total_sum_data))
+                global total_nots
+                total_nots += 1
+                # push parse notification
+                if(total_nots % PARSE_FALL_GROUP_LIMIT == 0):
+                    send_push()
+            sum_data.popleft()
+
+        '''
+        if outputSignal >= FALL_THRESH_HIGH or outputSignal <= FALL_THRESH_LOW:
+            print "fall detected"
+            global total_nots
+            total_nots += 1
+            # push parse notification
+            if(total_nots % 20 == 0):
+                send_push()
+        '''
+
+        lines_fifo.popleft()
+        #print "list_line = %s" % list_line
+        if (len(list_line) > 2):
+            lines_fifo.append(list_line[2])
+    else:
+        list_line = line.split(',')
+        #print "list_line = %s" % list_line
+        if (len(list_line) > 2):
+            lines_fifo.append(list_line[2])
 
 def main(args):
     weights = []
@@ -54,63 +110,12 @@ def main(args):
         #print ("[{}] = {}".format(weight, weights[weight]))
     fd = open(IMU_data, 'r')
 
-    dataPoint = 0
 
     while (1):
         outputSignal = 0.0
-
         line = fd.readline()
         if line:
-            dataPoint += 1
-            outputSignal = 0.0
-            #print "lines_fifo = %s" % lines_fifo
-            list_line = line.split(',')
-            #print list_line
-            if len(lines_fifo) >= args.filterLength:
-                for sample in xrange(0, args.filterLength):
-                    #print "float(lines_fifo[sample]) = %f" % float(lines_fifo[sample])
-                    #print "weights = %f " % weights[sample]
-                    #print "float(lines_fifo = %f)" % float(lines_fifo[sample])
-                    outputSignal = outputSignal + weights[sample]*float(lines_fifo[sample])
-
-                print ("[{}] outputSignal = {}").format(dataPoint, outputSignal)
-
-                sum_data.append(outputSignal)
-                #print ("sum_data = {}".format(sum_data))
-
-                if (len(sum_data) >= secondFilterLength):
-                    total_sum_data = 0
-                    for elem in sum_data:
-                        total_sum_data +=elem
-                    if total_sum_data >= FALL_THRESH_HIGH or total_sum_data <= FALL_THRESH_LOW:
-                        print "fall detected"
-                        print ("total_sum_data = {}".format(total_sum_data))
-                        global total_nots
-                        total_nots += 1
-                        # push parse notification
-                        if(total_nots % PARSE_FALL_GROUP_LIMIT == 0):
-                            send_push()
-                    sum_data.popleft()
-
-                '''
-                if outputSignal >= FALL_THRESH_HIGH or outputSignal <= FALL_THRESH_LOW:
-                    print "fall detected"
-                    global total_nots
-                    total_nots += 1
-                    # push parse notification
-                    if(total_nots % 20 == 0):
-                        send_push()
-                '''
-
-                lines_fifo.popleft()
-                #print "list_line = %s" % list_line
-                if (len(list_line) > 2):
-                    lines_fifo.append(list_line[2])
-            else:
-                list_line = line.split(',')
-                #print "list_line = %s" % list_line
-                if (len(list_line) > 2):
-                    lines_fifo.append(list_line[2])
+            motionFilter(line, weights)
         else:
             print "waiting for more data.."
             time.sleep(1)
