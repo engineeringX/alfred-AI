@@ -9,7 +9,7 @@ apiKey = "HEZHvUyEqV4VOV61YaEFbMywGKq7pJNlPhlQtWRt"
 connection = httplib.HTTPSConnection('api.parse.com', 443)
 connection.connect()
 
-IMU_data = "./data/test5"
+pipe = None
 filterLength = 50
 secondFilterLength = 70
 LowerCutOff = 0.005
@@ -25,10 +25,12 @@ lines_fifo = deque()
 sum_data = deque()
 
 
-def init():
+def init(p):
+    global pipe
+    pipe = p
+
     parser = argparse.ArgumentParser(description='input filter for IMU data')
 
-    parser.add_argument('-i', action="store", dest="IMU_data")
     parser.add_argument('-f', action="store", dest="filterLength", type=int, default=filterLength)
     parser.add_argument('-s', action="store", dest="samplingFreq", type=float, default=filterLength)
     parser.add_argument('-l', action="store", dest="firstCutOff", type=float, default=LowerCutOff)
@@ -43,8 +45,7 @@ def motionFilter(line, weights):
     dataPoint += 1
     outputSignal = 0.0
     #print "lines_fifo = %s" % lines_fifo
-    list_line = line.split(',')
-    #print list_line
+    #print line
     if len(lines_fifo) >= args.filterLength:
         for sample in xrange(0, args.filterLength):
             #print "float(lines_fifo[sample]) = %f" % float(lines_fifo[sample])
@@ -83,13 +84,12 @@ def motionFilter(line, weights):
 
         lines_fifo.popleft()
         #print "list_line = %s" % list_line
-        if (len(list_line) > 2):
-            lines_fifo.append(list_line[2])
+        if (len(line) > 2):
+            lines_fifo.append(line[2])
     else:
-        list_line = line.split(',')
-        #print "list_line = %s" % list_line
-        if (len(list_line) > 2):
-            lines_fifo.append(list_line[2])
+        #print "line = %s" % line
+        if (len(line) > 2):
+            lines_fifo.append(line[2])
 
 def main(args):
     weights = []
@@ -108,12 +108,13 @@ def main(args):
     weight = 0
     #for weight in xrange(0, len(weights)):
         #print ("[{}] = {}".format(weight, weights[weight]))
-    fd = open(IMU_data, 'r')
 
 
     while (1):
         outputSignal = 0.0
-        line = fd.readline()
+        global pipe
+        line = pipe.recv()
+        print(line)
         if line:
             motionFilter(line, weights)
         else:
@@ -135,6 +136,3 @@ def send_push():
             })
     result = json.loads(connection.getresponse().read())
     print result
-
-if __name__ == "__main__":
-    init()
