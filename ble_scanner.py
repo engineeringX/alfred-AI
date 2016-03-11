@@ -46,6 +46,8 @@ def my_ble_evt_gap_scan_response(sender, args):
 
 def ble_scanner(p):
   # Set the pipe and send function
+  global pipe
+  global send
   pipe = p
   if hasattr(p, 'send'):
     send = pipe_send

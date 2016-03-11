@@ -12,6 +12,7 @@ connection = httplib.HTTPSConnection('api.parse.com', 443)
 connection.connect()
 
 fd = None 
+recv = None
 filterLength = 50
 secondFilterLength = 70
 LowerCutOff = 0.005
@@ -32,6 +33,8 @@ def file_readline(f):
   return f.readline()
 
 def init(p):
+  global fd
+  global recv
   fd = p
   if hasattr(p, 'recv'):
     recv = pipe_recv
@@ -40,7 +43,7 @@ def init(p):
 
   parser = argparse.ArgumentParser(description='input filter for IMU data')
 
-  parser.add_argument('-i', action="store", dest="IMU_data")
+  #parser.add_argument('-i', action="store", dest="IMU_data")
   parser.add_argument('-f', action="store", dest="filterLength", type=int, default=filterLength)
   parser.add_argument('-s', action="store", dest="samplingFreq", type=float, default=filterLength)
   parser.add_argument('-l', action="store", dest="firstCutOff", type=float, default=LowerCutOff)
@@ -118,7 +121,6 @@ def main(args):
       if (len(data) > 2):
         lines_fifo.append(data[2])
     else:
-      data = line.split(',')
       #print "data = %s" % data
       if (len(data) > 2):
         lines_fifo.append(data[2])
