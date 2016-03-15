@@ -5,8 +5,8 @@ from multiprocessing import Pipe
 
 send = None
 pipe = None
-#mac = "EB16450404D9"
-mac = "C94B9DC414AF" 
+mac = "EB16450404D9"
+#mac = "C94B9DC414AF" 
 
 def pipe_send(pipe, data):
   pipe.send(data)

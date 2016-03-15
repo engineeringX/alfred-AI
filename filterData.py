@@ -44,7 +44,7 @@ def motionFilter(line, weights):
     outputSignal = 0.0
     #print "lines_fifo = %s" % lines_fifo
     list_line = line.split(',')
-    #print list_line
+    print list_line
     if len(lines_fifo) >= args.filterLength:
         for sample in xrange(0, args.filterLength):
             #print "float(lines_fifo[sample]) = %f" % float(lines_fifo[sample])
@@ -52,7 +52,7 @@ def motionFilter(line, weights):
             #print "float(lines_fifo = %f)" % float(lines_fifo[sample])
             outputSignal = outputSignal + weights[sample]*float(lines_fifo[sample])
 
-        print ("[{}] outputSignal = {}").format(dataPoint, outputSignal)
+        #print ("[{}] outputSignal = {}").format(dataPoint, outputSignal)
 
         sum_data.append(outputSignal)
         #print ("sum_data = {}".format(sum_data))
@@ -62,8 +62,8 @@ def motionFilter(line, weights):
             for elem in sum_data:
                 total_sum_data +=elem
             if total_sum_data >= FALL_THRESH_HIGH or total_sum_data <= FALL_THRESH_LOW:
-                print "fall detected"
-                print ("total_sum_data = {}".format(total_sum_data))
+                #print "fall detected"
+                #print ("total_sum_data = {}".format(total_sum_data))
                 global total_nots
                 total_nots += 1
                 # push parse notification
