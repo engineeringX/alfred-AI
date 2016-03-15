@@ -53,7 +53,7 @@ def motionFilter(line, weights):
             #print "float(lines_fifo = %f)" % float(lines_fifo[sample])
             outputSignal = outputSignal + weights[sample]*float(lines_fifo[sample])
 
-        print ("[{}] outputSignal = {}").format(dataPoint, outputSignal)
+        #print ("[{}] outputSignal = {}").format(dataPoint, outputSignal)
 
         sum_data.append(outputSignal)
         #print ("sum_data = {}".format(sum_data))
