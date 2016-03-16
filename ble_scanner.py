@@ -41,10 +41,11 @@ def my_ble_evt_gap_scan_response(sender, args):
       data = [(x - 65536) if (x & 0x8000) else x for x in data_bytes]
       send(pipe, data)
       fall_detected = fall_detected+1 if data[0] == 1 else 0
+      packet_count = packet_count+1 if packet_count < 500 else 0
       if fall_detected == 1:
         send_push()
-      packet_count = packet_count+1 if packet_count < 500 else 0
-      if packet_count == 0:
+        send_data(data[2], data[3])
+      elif packet_count == 0:
         send_data(data[2], data[3])
 
 def ble_scanner(p):
