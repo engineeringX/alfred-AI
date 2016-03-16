@@ -11,6 +11,7 @@ connection.connect()
 send = None
 pipe = None
 fall_detected = 0
+packet_count = 0
 #mac = "EB16450404D9"
 mac = "C94B9DC414AF"
 
@@ -31,6 +32,7 @@ def my_timeout(sender, args):
 # handler to print scan responses with a timestamp
 def my_ble_evt_gap_scan_response(sender, args):
   global fall_detected
+  global packet_count
   t = datetime.datetime.now()
   sender = ''.join(['%02X' % b for b in args["sender"][::-1]])
   if(sender == mac):
@@ -41,7 +43,9 @@ def my_ble_evt_gap_scan_response(sender, args):
       fall_detected = fall_detected+1 if data[0] == 1 else 0
       if fall_detected == 1:
         send_push()
-      send_data(data[2], data[3])
+      packet_count = packet_count+1 if packet_count < 500 else 0
+      if packet_count == 0:
+        send_data(data[2], data[3])
 
 def ble_scanner(p):
   # Set the pipe and send function
