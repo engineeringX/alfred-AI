@@ -3,10 +3,15 @@
 import bglib, serial, time, datetime, signal, sys
 from multiprocessing import Pipe
 
+appID = "kKW7oJS0nwEG4V6f3LvYooU5BQxFnH6eZ9aS31A3"
+apiKey = "HEZHvUyEqV4VOV61YaEFbMywGKq7pJNlPhlQtWRt"
+connection = httplib.HTTPSConnection('api.parse.com', 443)
+connection.connect()
+
 send = None
 pipe = None
 mac = "EB16450404D9"
-#mac = "C94B9DC414AF" 
+#mac = "C94B9DC414AF"
 
 def pipe_send(pipe, data):
   pipe.send(data)
@@ -31,6 +36,8 @@ def my_ble_evt_gap_scan_response(sender, args):
       data_bytes = [((next(it) << 8) | x) for x in it]
       data = [(x - 65536) if (x & 0x8000) else x for x in data_bytes]
       send(pipe, data)
+      if (data[0] == 1):
+        send_push()
 
 def ble_scanner(p):
   # Set the pipe and send function
@@ -91,6 +98,22 @@ def ble_scanner(p):
 
     # don't burden the CPU
     #time.sleep(0.01)
+
+def send_push():
+    connection.request('POST', '/1/push', json.dumps({
+        "channels": [
+            "Alfred"
+            ],
+        "data": {
+            "alert": "A fall has been detected"
+            }
+        }), {
+            "X-Parse-Application-Id": appID,
+            "X-Parse-REST-API-Key": apiKey,
+            "Content-Type": "application/json"
+            })
+    result = json.loads(connection.getresponse().read())
+    print result
 
 def exit_handler(signal, frame):
   pipe.close()
