@@ -41,6 +41,7 @@ def my_ble_evt_gap_scan_response(sender, args):
       fall_detected = fall_detected+1 if data[0] == 1 else 0
       if fall_detected == 1:
         send_push()
+      send_data(data[2], data[3])
 
 def ble_scanner(p):
   # Set the pipe and send function
@@ -103,20 +104,33 @@ def ble_scanner(p):
     #time.sleep(0.01)
 
 def send_push():
-    connection.request('POST', '/1/push', json.dumps({
-        "channels": [
-            "Alfred"
-            ],
-        "data": {
-            "alert": "A fall has been detected"
-            }
-        }), {
-            "X-Parse-Application-Id": appID,
-            "X-Parse-REST-API-Key": apiKey,
-            "Content-Type": "application/json"
-            })
-    result = json.loads(connection.getresponse().read())
-    print result
+  connection.request('POST', '/1/push', json.dumps({
+      "channels": [
+          "Alfred"
+          ],
+      "data": {
+          "alert": "A fall has been detected"
+          }
+      }), {
+          "X-Parse-Application-Id": appID,
+          "X-Parse-REST-API-Key": apiKey,
+          "Content-Type": "application/json"
+          })
+  result = json.loads(connection.getresponse().read())
+  print result
+
+def send_data(temp, bpm):
+  connection.request('PUT', '/1/classes/PatientDetailObject/CqNA6XCsu2', json.dumps({
+    "tmp": temp,
+    "bpm": bpm,
+    }), 
+    {
+    "X-Parse-Application-Id": appID,
+    "X-Parse-REST-API-Key": apiKey,
+    "Content-Type": "application/json"
+  })
+  result = json.loads(connection.getresponse().read())
+  print result
 
 def exit_handler(signal, frame):
   pipe.close()
