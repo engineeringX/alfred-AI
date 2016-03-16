@@ -31,18 +31,6 @@ def my_ble_evt_gap_scan_response(sender, args):
       data_bytes = [((next(it) << 8) | x) for x in it]
       data = [(x - 65536) if (x & 0x8000) else x for x in data_bytes]
       send(pipe, data)
-      #disp_list = []
-      #disp_list.append("%ld.%03ld" % (time.mktime(t.timetuple()), t.microsecond/1000))
-      #disp_list.append("%d" % args["rssi"])
-      #disp_list.append("%d" % args["packet_type"])
-      #disp_list.append("%s" % sender)
-      #disp_list.append("%d" % args["address_type"])
-      #disp_list.append("%d" % args["bond"])
-      #disp_list.append("%s" % ','.join(['%d' % b for b in data]))
-      #global packet_count
-      #packet_count += 1
-      #if(packet_count >= 1500):
-      #    exit_handler(0, 0)
 
 def ble_scanner(p):
   # Set the pipe and send function
