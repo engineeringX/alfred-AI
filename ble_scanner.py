@@ -155,9 +155,9 @@ def send_push_pulse():
               "Content-Type": "application/json"
               })
         result = json.loads(connection.getresponse().read())
+        print result
     except:
         pass
-    print result
 
 def send_push_temp():
     try:
@@ -174,9 +174,9 @@ def send_push_temp():
               "Content-Type": "application/json"
               })
         result = json.loads(connection.getresponse().read())
+        print result
     except:
         pass
-    print result
 
 def send_data(temp, bpm):
     try:
@@ -190,9 +190,9 @@ def send_data(temp, bpm):
         "Content-Type": "application/json"
       })
         result = json.loads(connection.getresponse().read())
+        print result
     except:
         pass
-    print result
 
 def send_historical_data(currentTime, temp, bpm):
     try:
@@ -209,9 +209,9 @@ def send_historical_data(currentTime, temp, bpm):
         "Content-Type": "application/json"
       })
         result = json.loads(connection.getresponse().read())
+        print result
     except:
         pass
-    print result
 
 def exit_handler(signal, frame):
   exit(0)
