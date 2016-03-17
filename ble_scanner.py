@@ -35,6 +35,7 @@ def my_timeout(sender, args):
 # handler to print scan responses with a timestamp
 def my_ble_evt_gap_scan_response(sender, args):
   global fall_detected
+  global abnormal_pulse
   global abnormal_temp
   global packet_count
   t = datetime.datetime.now()
@@ -152,7 +153,7 @@ def send_push_fall():
           })
   result = json.loads(connection.getresponse().read())
   send_historical_data(strftime("%Y-%m-%d_%H:%M:%S", time.localtime()))
-  send(pipe, result)
+  print result
 
 def send_push_pulse():
   connection.request('POST', '/1/push', json.dumps({
@@ -169,7 +170,7 @@ def send_push_pulse():
           })
   result = json.loads(connection.getresponse().read())
   send_historical_data(strftime("%Y-%m-%d_%H:%M:%S", time.localtime()))
-  send(pipe, result)
+  print result
 
 def send_push_temp():
   connection.request('POST', '/1/push', json.dumps({
@@ -185,7 +186,7 @@ def send_push_temp():
           "Content-Type": "application/json"
           })
   result = json.loads(connection.getresponse().read())
-  send(pipe, result)
+  print result
 
 def send_data(temp, bpm):
   connection.request('PUT', '/1/classes/PatientDetailObject/CqNA6XCsu2', json.dumps({
@@ -198,7 +199,7 @@ def send_data(temp, bpm):
     "Content-Type": "application/json"
   })
   result = json.loads(connection.getresponse().read())
-  send(pipe, result)
+  print result
 
 def send_historical_data(currentTime):
   connection.request('POST', '/1/classes/NumFallsObject', json.dumps({
