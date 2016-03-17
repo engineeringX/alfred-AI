@@ -36,19 +36,19 @@ def my_ble_evt_gap_scan_response(sender, args):
       data_bytes = [((next(it) << 8) | x) for x in it]
       data = [(x - 65536) if (x & 0x8000) else x for x in data_bytes]
       print(','.join(['%d' % b for b in data]))
-      
+
       packet_count = packet_count+1 if packet_count < 50 else 0
       fall_detected = fall_detected+1 if data[0] == 1 else 0
       abnormal_pulse = abnormal_pulse+1 if data[1] == 1 else 0
       abnormal_temp = abnormal_temp+1 if data[2] == 1 else 0
-      
+
       if fall_detected == 1:
-        send_push_fall()
+        send_push_fall(data[3], data[4])
         try:
 			      send_data(data[3], data[4])
         except:
 			      pass
-      
+
       if abnormal_pulse == 1:
         send_push_pulse()
         try:
@@ -120,7 +120,7 @@ def ble_scanner():
     # don't burden the CPU
     #time.sleep(0.01)
 
-def send_push_fall():
+def send_push_fall(temp, bpm):
   connection.request('POST', '/1/push', json.dumps({
       "channels": [
           "Alfred"
@@ -134,7 +134,7 @@ def send_push_fall():
           "Content-Type": "application/json"
           })
   result = json.loads(connection.getresponse().read())
-  send_historical_data(strftime("%Y-%m-%d_%H:%M:%S", time.localtime()))
+  send_historical_data(strftime("%Y-%m-%d_%H:%M:%S", time.localtime()), temp, bpm)
   print result
 
 def send_push_pulse():
@@ -159,7 +159,7 @@ def send_push_temp():
           "Alfred"
           ],
       "data": {
-          "alert": "Raunaq's temp is abnormal" 
+          "alert": "Raunaq's temp is abnormal"
           }
       }), {
           "X-Parse-Application-Id": appID,
@@ -182,10 +182,12 @@ def send_data(temp, bpm):
   result = json.loads(connection.getresponse().read())
   print result
 
-def send_historical_data(currentTime):
+def send_historical_data(currentTime, temp, bpm):
   connection.request('POST', '/1/classes/NumFallsObject', json.dumps({
     "firstName": "Raunaq",
     "lastName": "Sawhney",
+    "tmp": temp/32,
+    "bpm": bpm,
     "fall_timestamp": currentTime,
     }),
     {
