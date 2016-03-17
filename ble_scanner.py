@@ -177,7 +177,7 @@ def send_push_temp():
           "Alfred"
           ],
       "data": {
-          "alert": "Raunaq's temp is fucked up" 
+          "alert": "Raunaq's temp is abnormal" 
           }
       }), {
           "X-Parse-Application-Id": appID,
