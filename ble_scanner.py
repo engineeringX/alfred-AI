@@ -123,7 +123,7 @@ def send_push():
           "Content-Type": "application/json"
           })
   result = json.loads(connection.getresponse().read())
-  send_historical_data(strftime("%Y-%m-%d_%H:%M:%S"))
+  send_historical_data(strftime("%Y-%m-%d_%H:%M:%S", time.localtime()))
   print result
 
 def send_data(temp, bpm):
@@ -140,7 +140,7 @@ def send_data(temp, bpm):
   print result
 
 def send_historical_data(currentTime):
-  connection.request('PUT', '/1/classes/NumFallsObject', json.dumps({
+  connection.request('POST', '/1/classes/NumFallsObject', json.dumps({
     "firstName": "Raunaq",
     "lastName": "Sawhney",
     "fall_timestamp": currentTime,
