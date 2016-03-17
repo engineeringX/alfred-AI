@@ -35,7 +35,7 @@ def my_ble_evt_gap_scan_response(sender, args):
       it = iter(args["data"][args["data"].index(0xff)+1:])
       data_bytes = [((next(it) << 8) | x) for x in it]
       data = [(x - 65536) if (x & 0x8000) else x for x in data_bytes]
-      print(','.join(['%d' % b for b in data]) + "\n")
+      print(','.join(['%d' % b for b in data]))
       
       packet_count = packet_count+1 if packet_count < 50 else 0
       fall_detected = fall_detected+1 if data[0] == 1 else 0
