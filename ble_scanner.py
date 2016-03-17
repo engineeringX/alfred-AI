@@ -12,6 +12,7 @@ connection.connect()
 send = None
 pipe = None
 fall_detected = 0
+abnormal_temp = 0
 packet_count = 0
 #mac = "EB16450404D9"
 mac = "C94B9DC414AF"
@@ -33,6 +34,7 @@ def my_timeout(sender, args):
 # handler to print scan responses with a timestamp
 def my_ble_evt_gap_scan_response(sender, args):
   global fall_detected
+  global abnormal_temp
   global packet_count
   t = datetime.datetime.now()
   sender = ''.join(['%02X' % b for b in args["sender"][::-1]])
@@ -42,15 +44,21 @@ def my_ble_evt_gap_scan_response(sender, args):
       data = [(x - 65536) if (x & 0x8000) else x for x in data_bytes]
       send(pipe, data)
       fall_detected = fall_detected+1 if data[0] == 1 else 0
-      abnormal_temp = abnormal_temp+1 if data[3] == 1 else 0
+      abnormal_temp = abnormal_temp+1 if data[2] == 1 else 0
       packet_count = packet_count+1 if packet_count < 500 else 0
       if abnormal_temp == 1:
-        send_push_temp(abnormal_temp)
+        send_push_temp(data[3]/32)
       if fall_detected == 1:
         send_push_fall()
-        send_data(data[3], data[4])
+        try:
+			send_data(data[3], data[4])
+        except:
+			pass
       elif packet_count == 0:
-        send_data(data[3], data[4])
+        try:
+			send_data(data[3], data[4])
+        except:
+			pass
 
 def ble_scanner(p):
   # Set the pipe and send function
@@ -130,7 +138,7 @@ def send_push_fall():
   print result
 
 def send_push_temp(temp):
-    alert_msg = "Person has abnormal temperature {}".format(temp)
+  alert_msg = "Person has abnormal temperature {}".format(temp)
   connection.request('POST', '/1/push', json.dumps({
       "channels": [
           "Alfred"
@@ -148,7 +156,7 @@ def send_push_temp(temp):
 
 def send_data(temp, bpm):
   connection.request('PUT', '/1/classes/PatientDetailObject/CqNA6XCsu2', json.dumps({
-    "tmp": temp,
+    "tmp": temp/32,
     "bpm": bpm,
     }),
     {
