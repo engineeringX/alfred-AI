@@ -2,27 +2,18 @@
 
 import bglib, serial, time, datetime, signal, httplib, json, sys
 from time import strftime
-from multiprocessing import Pipe
 
 appID = "kKW7oJS0nwEG4V6f3LvYooU5BQxFnH6eZ9aS31A3"
 apiKey = "HEZHvUyEqV4VOV61YaEFbMywGKq7pJNlPhlQtWRt"
 connection = httplib.HTTPSConnection('api.parse.com', 443)
 connection.connect()
 
-send = None
-pipe = None
 fall_detected = 0
 abnormal_pulse = 0
 abnormal_temp = 0
 packet_count = 0
 #mac = "EB16450404D9"
 mac = "C94B9DC414AF"
-
-def pipe_send(pipe, data):
-  pipe.send(data)
-
-def file_write(f, data):
-  f.write(','.join(['%d' % b for b in data]) + "\n")
 
 # handler to notify of an API parser timeout condition
 def my_timeout(sender, args):
@@ -44,7 +35,7 @@ def my_ble_evt_gap_scan_response(sender, args):
       it = iter(args["data"][args["data"].index(0xff)+1:])
       data_bytes = [((next(it) << 8) | x) for x in it]
       data = [(x - 65536) if (x & 0x8000) else x for x in data_bytes]
-      send(pipe, data)
+      print(','.join(['%d' % b for b in data]) + "\n")
       
       packet_count = packet_count+1 if packet_count < 50 else 0
       fall_detected = fall_detected+1 if data[0] == 1 else 0
@@ -78,16 +69,7 @@ def my_ble_evt_gap_scan_response(sender, args):
         except:
 			      pass
 
-def ble_scanner(p):
-  # Set the pipe and send function
-  global pipe
-  global send
-  pipe = p
-  if hasattr(p, 'send'):
-    send = pipe_send
-  else:
-    send = file_write
-
+def ble_scanner():
   # Handle ctrl-c
   signal.signal(signal.SIGINT, exit_handler)
 
@@ -215,12 +197,7 @@ def send_historical_data(currentTime):
   print result
 
 def exit_handler(signal, frame):
-  pipe.close()
   exit(0)
 
 if __name__ == '__main__':
-  if len(sys.argv) > 1:
-    with open(sys.argv[1], 'r') as f:
-      ble_scanner(f)
-  else:
-      ble_scanner(sys.stdout)
+  ble_scanner()
