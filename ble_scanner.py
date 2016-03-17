@@ -12,6 +12,7 @@ connection.connect()
 send = None
 pipe = None
 fall_detected = 0
+abnormal_pulse = 0
 abnormal_temp = 0
 packet_count = 0
 #mac = "EB16450404D9"
@@ -46,17 +47,35 @@ def my_ble_evt_gap_scan_response(sender, args):
       
       packet_count = packet_count+1 if packet_count < 50 else 0
       fall_detected = fall_detected+1 if data[0] == 1 else 0
+      abnormal_pulse = abnormal_pulse+1 if data[1] == 1 else 0
+      abnormal_temp = abnormal_temp+1 if data[2] == 1 else 0
+      
       if fall_detected == 1:
         send_push_fall()
         try:
-			send_data(data[3], data[4])
+			      send_data(data[3], data[4])
         except:
-			pass
-      elif packet_count == 0:
+			      pass
+      
+      if abnormal_pulse == 1:
+        send_push_pulse()
         try:
-			send_data(data[3], data[4])
+			      send_data(data[3], data[4])
         except:
-			pass
+			      pass
+
+      if abnormal_temp == 1:
+        send_push_temp()
+        try:
+			      send_data(data[3], data[4])
+        except:
+			      pass
+
+      if packet_count == 0:
+        try:
+			      send_data(data[3], data[4])
+        except:
+			      pass
 
 def ble_scanner(p):
   # Set the pipe and send function
@@ -133,19 +152,15 @@ def send_push_fall():
           })
   result = json.loads(connection.getresponse().read())
   send_historical_data(strftime("%Y-%m-%d_%H:%M:%S", time.localtime()))
-  print result
+  send(pipe, result)
 
-def send_push_temp(temp):
-  if (temp >= 36):
-    alert_msg = "Raunaq's body temperature rose to {}".format(temp)
-  else:
-    alert_msg = "Raunaq's body temperature fell to {}".format(temp)
+def send_push_pulse():
   connection.request('POST', '/1/push', json.dumps({
       "channels": [
           "Alfred"
           ],
       "data": {
-          "alert": alert_msg
+        "alert": "Raunaq's pulse is abnormal :("
           }
       }), {
           "X-Parse-Application-Id": appID,
@@ -153,7 +168,24 @@ def send_push_temp(temp):
           "Content-Type": "application/json"
           })
   result = json.loads(connection.getresponse().read())
-  print result
+  send_historical_data(strftime("%Y-%m-%d_%H:%M:%S", time.localtime()))
+  send(pipe, result)
+
+def send_push_temp():
+  connection.request('POST', '/1/push', json.dumps({
+      "channels": [
+          "Alfred"
+          ],
+      "data": {
+          "alert": "Raunaq's temp is fucked up" 
+          }
+      }), {
+          "X-Parse-Application-Id": appID,
+          "X-Parse-REST-API-Key": apiKey,
+          "Content-Type": "application/json"
+          })
+  result = json.loads(connection.getresponse().read())
+  send(pipe, result)
 
 def send_data(temp, bpm):
   connection.request('PUT', '/1/classes/PatientDetailObject/CqNA6XCsu2', json.dumps({
@@ -166,7 +198,7 @@ def send_data(temp, bpm):
     "Content-Type": "application/json"
   })
   result = json.loads(connection.getresponse().read())
-  print result
+  send(pipe, result)
 
 def send_historical_data(currentTime):
   connection.request('POST', '/1/classes/NumFallsObject', json.dumps({
