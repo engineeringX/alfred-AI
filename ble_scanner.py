@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import bglib, serial, time, datetime, signal, httplib, json, sys
+from time import strftime
 from multiprocessing import Pipe
 
 appID = "kKW7oJS0nwEG4V6f3LvYooU5BQxFnH6eZ9aS31A3"
@@ -122,13 +123,28 @@ def send_push():
           "Content-Type": "application/json"
           })
   result = json.loads(connection.getresponse().read())
+  send_historical_data(strftime("%Y-%m-%d_%H:%M:%S")))
   print result
 
 def send_data(temp, bpm):
   connection.request('PUT', '/1/classes/PatientDetailObject/CqNA6XCsu2', json.dumps({
     "tmp": temp,
     "bpm": bpm,
-    }), 
+    }),
+    {
+    "X-Parse-Application-Id": appID,
+    "X-Parse-REST-API-Key": apiKey,
+    "Content-Type": "application/json"
+  })
+  result = json.loads(connection.getresponse().read())
+  print result
+
+def send_historical_data(currentTime):
+  connection.request('PUT', '/1/classes/NumFallsObject', json.dumps({
+    "firstName": "Raunaq",
+    "lastName": "Sawhney",
+    "fall_timestamp": currentTime,
+    }),
     {
     "X-Parse-Application-Id": appID,
     "X-Parse-REST-API-Key": apiKey,
