@@ -123,7 +123,7 @@ def send_push():
           "Content-Type": "application/json"
           })
   result = json.loads(connection.getresponse().read())
-  send_historical_data(strftime("%Y-%m-%d_%H:%M:%S")))
+  send_historical_data(strftime("%Y-%m-%d_%H:%M:%S"))
   print result
 
 def send_data(temp, bpm):
