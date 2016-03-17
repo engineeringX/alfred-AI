@@ -121,82 +121,97 @@ def ble_scanner():
     #time.sleep(0.01)
 
 def send_push_fall(temp, bpm):
-  connection.request('POST', '/1/push', json.dumps({
-      "channels": [
-          "Alfred"
-          ],
-      "data": {
-          "alert": "Raunaq fell :("
-          }
-      }), {
-          "X-Parse-Application-Id": appID,
-          "X-Parse-REST-API-Key": apiKey,
-          "Content-Type": "application/json"
-          })
-  result = json.loads(connection.getresponse().read())
-  send_historical_data(strftime("%Y-%m-%d_%H:%M:%S", time.localtime()), temp, bpm)
-  print result
+    try:
+        connection.request('POST', '/1/push', json.dumps({
+          "channels": [
+              "Alfred"
+              ],
+          "data": {
+              "alert": "Raunaq fell :("
+              }
+          }), {
+              "X-Parse-Application-Id": appID,
+              "X-Parse-REST-API-Key": apiKey,
+              "Content-Type": "application/json"
+              })
+        result = json.loads(connection.getresponse().read())
+        send_historical_data(strftime("%Y-%m-%d_%H:%M:%S", time.localtime()), temp, bpm)
+    except:
+        pass
+    print result
 
 def send_push_pulse():
-  connection.request('POST', '/1/push', json.dumps({
-      "channels": [
-          "Alfred"
-          ],
-      "data": {
-        "alert": "Raunaq's pulse is abnormal :("
-          }
-      }), {
-          "X-Parse-Application-Id": appID,
-          "X-Parse-REST-API-Key": apiKey,
-          "Content-Type": "application/json"
-          })
-  result = json.loads(connection.getresponse().read())
-  print result
+    try:
+        connection.request('POST', '/1/push', json.dumps({
+          "channels": [
+              "Alfred"
+              ],
+          "data": {
+            "alert": "Raunaq's pulse is abnormal :("
+              }
+          }), {
+              "X-Parse-Application-Id": appID,
+              "X-Parse-REST-API-Key": apiKey,
+              "Content-Type": "application/json"
+              })
+        result = json.loads(connection.getresponse().read())
+    except:
+        pass
+    print result
 
 def send_push_temp():
-  connection.request('POST', '/1/push', json.dumps({
-      "channels": [
-          "Alfred"
-          ],
-      "data": {
-          "alert": "Raunaq's temp is abnormal"
-          }
-      }), {
-          "X-Parse-Application-Id": appID,
-          "X-Parse-REST-API-Key": apiKey,
-          "Content-Type": "application/json"
-          })
-  result = json.loads(connection.getresponse().read())
-  print result
+    try:
+        connection.request('POST', '/1/push', json.dumps({
+          "channels": [
+              "Alfred"
+              ],
+          "data": {
+              "alert": "Raunaq's temp is abnormal"
+              }
+          }), {
+              "X-Parse-Application-Id": appID,
+              "X-Parse-REST-API-Key": apiKey,
+              "Content-Type": "application/json"
+              })
+        result = json.loads(connection.getresponse().read())
+    except:
+        pass
+    print result
 
 def send_data(temp, bpm):
-  connection.request('PUT', '/1/classes/PatientDetailObject/CqNA6XCsu2', json.dumps({
-    "tmp": temp/32,
-    "bpm": bpm,
-    }),
-    {
-    "X-Parse-Application-Id": appID,
-    "X-Parse-REST-API-Key": apiKey,
-    "Content-Type": "application/json"
-  })
-  result = json.loads(connection.getresponse().read())
-  print result
+    try:
+        connection.request('PUT', '/1/classes/PatientDetailObject/CqNA6XCsu2', json.dumps({
+        "tmp": temp/32,
+        "bpm": bpm,
+        }),
+        {
+        "X-Parse-Application-Id": appID,
+        "X-Parse-REST-API-Key": apiKey,
+        "Content-Type": "application/json"
+      })
+        result = json.loads(connection.getresponse().read())
+    except:
+        pass
+    print result
 
 def send_historical_data(currentTime, temp, bpm):
-  connection.request('POST', '/1/classes/NumFallsObject', json.dumps({
-    "firstName": "Raunaq",
-    "lastName": "Sawhney",
-    "tmp": temp/32,
-    "bpm": bpm,
-    "fall_timestamp": currentTime,
-    }),
-    {
-    "X-Parse-Application-Id": appID,
-    "X-Parse-REST-API-Key": apiKey,
-    "Content-Type": "application/json"
-  })
-  result = json.loads(connection.getresponse().read())
-  print result
+    try:
+        connection.request('POST', '/1/classes/NumFallsObject', json.dumps({
+        "firstName": "Raunaq",
+        "lastName": "Sawhney",
+        "tmp": temp/32,
+        "bpm": bpm,
+        "fall_timestamp": currentTime,
+        }),
+        {
+        "X-Parse-Application-Id": appID,
+        "X-Parse-REST-API-Key": apiKey,
+        "Content-Type": "application/json"
+      })
+        result = json.loads(connection.getresponse().read())
+    except:
+        pass
+    print result
 
 def exit_handler(signal, frame):
   exit(0)
