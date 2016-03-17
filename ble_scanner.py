@@ -169,7 +169,6 @@ def send_push_pulse():
           "Content-Type": "application/json"
           })
   result = json.loads(connection.getresponse().read())
-  send_historical_data(strftime("%Y-%m-%d_%H:%M:%S", time.localtime()))
   print result
 
 def send_push_temp():
