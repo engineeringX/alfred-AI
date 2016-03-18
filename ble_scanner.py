@@ -31,7 +31,11 @@ def my_ble_evt_gap_scan_response(sender, args):
   global abnormal_temp
   global packet_count
   t = datetime.datetime.now()
-  sender = ''.join(['%02X' % b for b in args["sender"][::-1]])
+  #sender = ''.join(['%02X' % b for b in args["sender"][::-1]])
+  idx = args["data"].index(0x09)
+  name_len = args["data"][idx-1]
+  sender = ''.join([chr(b) for b in args["data"][idx+1:name_len+idx+1]])
+  print(sender)
   if(sender == mac):
       it = iter(args["data"][args["data"].index(0xff)+1:])
       data_bytes = [((next(it) << 8) | x) for x in it]
