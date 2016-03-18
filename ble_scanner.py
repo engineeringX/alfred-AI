@@ -39,7 +39,7 @@ def my_ble_evt_gap_scan_response(sender, args):
 
       packet_count = packet_count+1 if packet_count < 50 else 0
       fall_detected = fall_detected+1 if (data[0] & 0x1) == 1 else 0
-      abnormal_pulse = abnormal_pulse+1 if (data[0] & 0x2)  == 1 else 0
+      abnormal_pulse = abnormal_pulse+1 if (data[0] & 0x2) == 1 else 0
       abnormal_temp = abnormal_temp+1 if (data[0] & 0x4) == 1 else 0
 
       if fall_detected == 1:
