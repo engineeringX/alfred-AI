@@ -13,7 +13,8 @@ abnormal_pulse = 0
 abnormal_temp = 0
 packet_count = 0
 #mac = "EB16450404D9"
-mac = "C94B9DC414AF"
+#mac = "C94B9DC414AF"
+mac = "F9B27838A16A"
 
 # handler to notify of an API parser timeout condition
 def my_timeout(sender, args):
