@@ -137,9 +137,9 @@ def send_push_fall(temp, bpm):
               })
         result = json.loads(connection.getresponse().read())
         send_historical_data(strftime("%Y-%m-%d_%H:%M:%S", time.localtime()), temp, bpm)
+        print result
     except:
         pass
-    print result
 
 def send_push_pulse():
     try:
