@@ -247,6 +247,6 @@ def exit_handler(signal, frame):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="ble_scanner")
-    parser.add_argument('-m', action="store", dest=MAC, default=MAC)
-    parser.parse_args()
+    parser.add_argument('-m', action="store", dest='mac', default=MAC)
+    MAC = parser.parse_args().mac
     ble_scanner()
