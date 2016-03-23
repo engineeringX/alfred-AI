@@ -12,8 +12,8 @@ fall_detected = 0
 abnormal_pulse = 0
 abnormal_temp = 0
 packet_count = 0
-#mac = "EB16450404D9"
-#mac = "C94B9DC414AF"
+#MAC = "EB16450404D9"
+#MAC = "C94B9DC414AF"
 MAC = "F9B27838A16A"
 
 # handler to notify of an API parser timeout condition
@@ -32,7 +32,7 @@ def my_ble_evt_gap_scan_response(sender, args):
   global packet_count
   t = datetime.datetime.now()
   sender = ''.join(['%02X' % b for b in args["sender"][::-1]])
-  if(sender == mac):
+  if(sender == MAC):
       it = iter(args["data"][args["data"].index(0xff)+1:])
       data_bytes = [((next(it) << 8) | x) for x in it]
       data = [(x - 65536) if (x & 0x8000) else x for x in data_bytes]
