@@ -128,7 +128,7 @@ def send_push_fall(temp, bpm):
               "Alfred"
               ],
           "data": {
-              "alert": "Raunaq fell :("
+              "alert": "Alfred just had a fall in Davis Centre."
               }
           }), {
               "X-Parse-Application-Id": appID,
@@ -143,12 +143,19 @@ def send_push_fall(temp, bpm):
 
 def send_push_pulse():
     try:
+        bpm_str = ""
+
+        if bpm < 40 :
+            bpm_str = "lower"
+        elif bpm  > 120:
+            bpm_str = "higher"
+
         connection.request('POST', '/1/push', json.dumps({
           "channels": [
               "Alfred"
               ],
           "data": {
-            "alert": "Raunaq's pulse is abnormal :("
+            "alert": "Alfred's pulse is " + bpm_str + " than normal"
               }
           }), {
               "X-Parse-Application-Id": appID,
@@ -162,12 +169,19 @@ def send_push_pulse():
 
 def send_push_temp():
     try:
+        temp_str = ""
+
+        if temp/32 < 40 :
+            temp_str = "lower"
+        elif temp/32  > 120:
+            temp_str = "higher"
+
         connection.request('POST', '/1/push', json.dumps({
           "channels": [
               "Alfred"
               ],
           "data": {
-              "alert": "Raunaq's temp is abnormal"
+              "alert": "Alfred's temperature is " + temp_str + " than normal"
               }
           }), {
               "X-Parse-Application-Id": appID,
@@ -198,11 +212,25 @@ def send_data(temp, bpm):
 def send_historical_data(currentTime, temp, bpm):
     try:
         connection.request('POST', '/1/classes/NumFallsObject', json.dumps({
-        "firstName": "Raunaq",
-        "lastName": "Sawhney",
+        "firstName": "Alfred",
+        "lastName": "Pennyworth",
         "tmp": temp/32,
         "bpm": bpm,
         "fall_timestamp": currentTime,
+        }),
+        {
+        "X-Parse-Application-Id": appID,
+        "X-Parse-REST-API-Key": apiKey,
+        "Content-Type": "application/json"
+      })
+        result = json.loads(connection.getresponse().read())
+        print result
+    except:
+        pass
+
+    try:
+        connection.request('POST', '/1/classes/PatientDetailObject/CqNA6XCsu2', json.dumps({
+            "summary": "Fall :" + currentTime,
         }),
         {
         "X-Parse-Application-Id": appID,
