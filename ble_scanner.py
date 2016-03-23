@@ -128,7 +128,7 @@ def send_push_fall(temp, bpm):
               "Alfred"
               ],
           "data": {
-              "alert": "Alfred just had a fall in Davis Centre."
+              "alert": "A fall was detected. Alfred may be in trouble!"
               }
           }), {
               "X-Parse-Application-Id": appID,
