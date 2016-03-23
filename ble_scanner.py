@@ -48,6 +48,7 @@ def my_ble_evt_gap_scan_response(sender, args):
         try:
 			      send_data(data[1], data[2])
         except:
+			      print("[PARSE][ERROR]: Couldn't send event to parse")
 			      pass
 
       if abnormal_pulse == 1:
@@ -55,6 +56,7 @@ def my_ble_evt_gap_scan_response(sender, args):
         try:
 			      send_data(data[1], data[2])
         except:
+			      print("[PARSE][ERROR]: Couldn't send event to parse")
 			      pass
 
       if abnormal_temp == 1:
@@ -62,12 +64,14 @@ def my_ble_evt_gap_scan_response(sender, args):
         try:
 			      send_data(data[1], data[2])
         except:
+			      print("[PARSE][ERROR]: Couldn't send event to parse")
 			      pass
 
       if packet_count == 0:
         try:
 			      send_data(data[1], data[2])
         except:
+			      print("[PARSE][ERROR]: Couldn't send event to parse")
 			      pass
 
 def ble_scanner():
