@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import bglib, serial, time, datetime, signal, httplib, json, sys
+import bglib, serial, time, datetime, signal, httplib, json, sys, argparse
 from time import strftime
 
 appID = "kKW7oJS0nwEG4V6f3LvYooU5BQxFnH6eZ9aS31A3"
@@ -14,7 +14,7 @@ abnormal_temp = 0
 packet_count = 0
 #mac = "EB16450404D9"
 #mac = "C94B9DC414AF"
-mac = "F9B27838A16A"
+MAC = "F9B27838A16A"
 
 # handler to notify of an API parser timeout condition
 def my_timeout(sender, args):
@@ -243,7 +243,10 @@ def send_historical_data(currentTime, temp, bpm):
         pass
 
 def exit_handler(signal, frame):
-  exit(0)
+    exit(0)
 
 if __name__ == '__main__':
-  ble_scanner()
+    parser = argparse.ArgumentParser(description="ble_scanner")
+    parser.add_argument('-m', action="store", dest=MAC, default="F9B27838A16A")
+    parser.parse_args()
+    ble_scanner()
